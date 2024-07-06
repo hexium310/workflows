@@ -1,16 +1,12 @@
 name: Bump
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       version_part:
         description: 'Version part to bump'
         required: true
         default: patch
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
+        type: string
       package:
         description: 'Target package'
         required: true
@@ -21,6 +17,10 @@ jobs:
     name: Bump
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.BUMP_TOKEN }}
       - name: Install cargo-edit
         uses: taiki-e/install-action@v2
         with:
