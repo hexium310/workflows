@@ -1,0 +1,85 @@
+name: Bump
+
+description: Bump
+
+inputs:
+  strategy:
+    description: The strategy to bump the version number. It can be set `major`, `minor`, or `patch` and defaults to patch.
+    required: true
+    default: patch
+  package-ecosystems:
+    description: The string of the array containing package ecosystems such as `'["cargo", "yarn"]'` to use for bumping the version number. It can be set `cargo` or `yarn`.
+    required: true
+  cargo-package:
+    description: The cargo package to bump the version number.
+    required: false
+  token:
+    description: The GitHub token. It defaults to github.token.
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ inputs.token }}
+
+    - name: Install cargo-edit
+      if: ${{ contains(fromJson(inputs.package-ecosystems), "cargo") }}
+      uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-edit
+    - name: Bump Cargo
+      id: cargo
+      if: ${{ contains(fromJson(inputs.package-ecosystems), "cargo") }}
+      shell: bash
+      run: |
+        cargo_option_package=()
+        if [[ -n "${{ inputs.cargo-package }}" ]]; then
+          cargo_option_package+=(--package "${{ inputs.cargo-package }}")
+        fi
+
+        cargo set-version --bump "${{ inputs.strategy }}" "${cargo_option_package[@]}"
+
+        version="$(cargo metadata --format-version 1 --no-deps | \
+          jq --raw-output --arg package "${{ inputs.cargo-package }}" '.packages[] | if $package != "" then select(.name == $package) end | .version')"
+        echo "version=$version" >> $GITHUB_OUTPUT
+
+    - name: Bump yarn
+      id: yarn
+      if: ${{ contains(fromJson(inputs.package-ecosystems), "yarn") }}
+      shell: bash
+      run: |
+        if [[ "$(yarn --version)" == 1.* ]]; then
+          yarn version --no-git-tag-version --"${{ inputs.strategy }}"
+        else
+          yarn version "${{ inputs.strategy }}"
+        fi
+
+        version="$(jq --raw-output .version package.json)"
+        echo "version=$version" >> $GITHUB_OUTPUT
+
+    - name: Create tag and push
+      shell: bash
+      run: |
+        if [[ -n "${{ steps.cargo.outputs.version }}" ]]; then
+          tag_temp=("${{ inputs.cargo-package }}" "${{ steps.cargo.outputs.version }}")
+          tag="$(IFS="|"; echo "${tag_temp[*]}")"
+          version="${{ steps.cargo.outputs.version }}"
+        fi
+
+        if [[ -n "${{ steps.yarn.outputs.version }}" ]]; then
+          tag="${{ steps.yarn.outputs.version }}"
+          version="${{ steps.yarn.outputs.version }}"
+        fi
+
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add .
+        message=(Bump "${{ inputs.cargo-package }}" to "$version")
+        git commit --message "$(echo ${message[@]})"
+        git tag $tag
+        git push
+        git push --tags
