@@ -27,13 +27,13 @@ runs:
         token: ${{ inputs.token }}
 
     - name: Install cargo-edit
-      if: ${{ contains(fromJson(inputs.package-ecosystems), "cargo") }}
+      if: ${{ contains(fromJson(inputs.package-ecosystems), 'cargo') }}
       uses: taiki-e/install-action@v2
       with:
         tool: cargo-edit
     - name: Bump Cargo
       id: cargo
-      if: ${{ contains(fromJson(inputs.package-ecosystems), "cargo") }}
+      if: ${{ contains(fromJson(inputs.package-ecosystems), 'cargo') }}
       shell: bash
       run: |
         cargo_option_package=()
@@ -49,7 +49,7 @@ runs:
 
     - name: Bump yarn
       id: yarn
-      if: ${{ contains(fromJson(inputs.package-ecosystems), "yarn") }}
+      if: ${{ contains(fromJson(inputs.package-ecosystems), 'yarn') }}
       shell: bash
       run: |
         if [[ "$(yarn --version)" == 1.* ]]; then
