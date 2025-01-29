@@ -66,7 +66,7 @@ runs:
       run: |
         if [[ -n "${{ steps.cargo.outputs.version }}" ]]; then
           tag_temp=("${{ inputs.cargo-package }}" "${{ steps.cargo.outputs.version }}")
-          tag="$(IFS="|"; echo "${tag_temp[*]}")"
+          tag="$(IFS="/"; echo "${tag_temp[*]}")"
           version="${{ steps.cargo.outputs.version }}"
         fi
 
