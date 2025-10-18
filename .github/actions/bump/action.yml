@@ -65,7 +65,7 @@ runs:
       shell: bash
       run: |
         if [[ -n "${{ steps.cargo.outputs.version }}" ]]; then
-          tag_temp=("${{ inputs.cargo-package }}" "${{ steps.cargo.outputs.version }}")
+          tag_temp=(${{ inputs.cargo-package }} "${{ steps.cargo.outputs.version }}")
           tag="$(IFS="/"; echo "${tag_temp[*]}")"
           version="${{ steps.cargo.outputs.version }}"
         fi
@@ -78,7 +78,7 @@ runs:
         git config user.name "github-actions[bot]"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git add .
-        message=(Bump "${{ inputs.cargo-package }}" to "$version")
+        message=(Bump ${{ inputs.cargo-package }} to "$version")
         git commit --message "$(echo ${message[@]})"
         git tag $tag
         git push
