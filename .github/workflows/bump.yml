@@ -22,7 +22,7 @@ jobs:
         with:
           token: ${{ secrets.BUMP_TOKEN }}
       - name: Install cargo-edit
-        uses: taiki-e/install-action@v2.86.7
+        uses: taiki-e/install-action@v2.87.3
         with:
           tool: cargo-edit
       - name: Create tag
