@@ -22,13 +22,13 @@ runs:
   using: composite
   steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4.4.0
       with:
         token: ${{ inputs.token }}
 
     - name: Install cargo-edit
       if: ${{ contains(fromJson(inputs.package-ecosystems), 'cargo') }}
-      uses: taiki-e/install-action@v2
+      uses: taiki-e/install-action@v2.90.0
       with:
         tool: cargo-edit
     - name: Bump Cargo
