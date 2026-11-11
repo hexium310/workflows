@@ -22,7 +22,7 @@ runs:
   using: composite
   steps:
     - name: Checkout repository
-      uses: actions/checkout@v4.4.0
+      uses: actions/checkout@v7.0.1
       with:
         token: ${{ inputs.token }}
 
